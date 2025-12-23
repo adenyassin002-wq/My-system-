@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Al Rahma School Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .page { display: none; }
+        .page.active { display: block; }
+        .nav-link.active { background-color: #f1f5f9; color: #1e3a8a; border-left: 5px solid #1e3a8a; }
+        .table-container { overflow-x: auto; }
+    </style>
+</head>
+<body class="bg-[#f8fafc] min-h-screen text-slate-900 flex">
+
+    <!-- LOGIN OVERLAY -->
+    <div id="loginOverlay" class="fixed inset-0 bg-white z-[5000] flex items-center justify-center">
+        <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl w-full max-w-md text-center border border-slate-100">
+            <div class="bg-blue-900 text-white w-16 h-16 flex items-center justify-center rounded-2xl text-2xl font-black italic mx-auto mb-4">AR</div>
+            <h2 class="text-2xl font-black text-slate-800 mb-6">Al Rahma Login</h2>
+            <div class="space-y-4">
+                <input id="loginUser" type="text" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:ring-2 focus:ring-blue-500" placeholder="Username">
+                <input id="loginPass" type="password" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:ring-2 focus:ring-blue-500" placeholder="Password">
+                <button id="loginBtn" class="w-full bg-blue-900 text-white py-4 rounded-2xl font-bold shadow-lg hover:bg-blue-800 transition-all">SOO GAL</button>
+            </div>
+            <p class="text-xs text-slate-400 mt-6">Default: <span class="font-bold">admin</span> / <span class="font-bold">123</span></p>
+        </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside class="w-64 bg-white border-r border-slate-200 h-screen flex flex-col p-6 sticky top-0 z-40">
+        <div class="flex items-center gap-3 py-6 mb-6">
+            <div class="bg-blue-900 text-white font-black p-2 rounded-xl text-lg italic">AR</div>
+            <h1 class="text-xl font-black">Al Rahma</h1>
+        </div>
+        <nav class="flex-1 space-y-1">
+            <button onclick="showPage('dashboard')" id="btnDashboard" class="nav-link active w-full flex items-center gap-3 px-5 py-3.5 rounded-xl font-bold text-slate-500 hover:bg-slate-50 text-left">📊 Dashboard</button>
+            <button onclick="showPage('students')" id="btnStudents" class="nav-link w-full flex items-center gap-3 px-5 py-3.5 rounded-xl font-bold text-slate-500 hover:bg-slate-50 text-left">👨‍🎓 Ardayda</button>
+            <button onclick="showPage('attendance')" id="btnAttendance" class="nav-link w-full flex items-center gap-3 px-5 py-3.5 rounded-xl font-bold text-slate-500 hover:bg-slate-50 text-left">📅 Imaanshaha</button>
+            <button onclick="showPage('payments')" id="btnPayments" class="nav-link w-full flex items-center gap-3 px-5 py-3.5 rounded-xl font-bold text-slate-500 hover:bg-slate-50 text-left">💰 Lacagta</button>
+            <button onclick="showPage('exams')" id="btnExams" class="nav-link w-full flex items-center gap-3 px-5 py-3.5 rounded-xl font-bold text-slate-500 hover:bg-slate-50 text-left">📝 Imtixaanka</button>
+            <button onclick="showPage('settings')" id="btnSettings" class="nav-link w-full flex items-center gap-3 px-5 py-3.5 rounded-xl font-bold text-slate-500 hover:bg-slate-50 text-left">⚙️ Settings</button>
+        </nav>
+        <div id="authStatus" class="text-[10px] font-bold text-slate-400 p-2 bg-slate-50 rounded-lg text-center italic">Connecting...</div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 p-6 overflow-y-auto">
+        
+        <!-- DASHBOARD -->
+        <section id="dashboard" class="page active space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-blue-900 text-white p-6 rounded-[2rem] shadow-sm">
+                    <p class="text-xs opacity-70">Wadarta Ardayda</p>
+                    <p id="dashStudents" class="text-4xl font-black">0</p>
+                </div>
+                <div class="bg-white p-6 rounded-[2rem] border-l-4 border-green-500 shadow-sm">
+                    <p class="text-xs text-slate-400">Lacagta La Bixiyay</p>
+                    <p id="dashPaid" class="text-4xl font-black text-green-600">0 FDJ</p>
+                </div>
+                <div class="bg-white p-6 rounded-[2rem] border-l-4 border-red-500 shadow-sm">
+                    <p class="text-xs text-slate-400">Deynta Maqan</p>
+                    <p id="dashBalance" class="text-4xl font-black text-red-600">0 FDJ</p>
+                </div>
+            </div>
+            <div class="bg-blue-50 p-8 rounded-[2.5rem] border border-blue-100 flex items-center gap-6">
+                <div class="flex-1">
+                    <h3 class="text-2xl font-black text-blue-900">Nidaamka Maareynta Al Rahma</h3>
+                    <p class="text-blue-700">Ku soo dhowaada nidaamka oo hadda leh Search iyo Filter qayb kasta ah.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- STUDENTS -->
+        <section id="students" class="page space-y-6">
+            <div class="flex flex-wrap justify-between items-center gap-4 bg-white p-4 rounded-2xl border">
+                <div class="flex gap-2 flex-1 min-w-[300px]">
+                    <input type="text" id="sSearch" oninput="renderStudents()" placeholder="Raadi magaca ardayga..." class="flex-1 p-3 bg-slate-50 rounded-xl outline-none border focus:ring-2 focus:ring-blue-100">
+                    <select id="sFilterClass" onchange="renderStudents()" class="p-3 bg-slate-50 rounded-xl outline-none border"></select>
+                </div>
+                <button onclick="openModal('sModal')" class="bg-blue-900 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-blue-800">+ Arday Cusub</button>
+            </div>
+            <div class="bg-white rounded-[2rem] border overflow-hidden shadow-sm table-container">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 border-b">
+                        <tr>
+                            <th class="p-5 text-xs font-black uppercase">Magaca</th>
+                            <th class="p-5 text-xs font-black uppercase">Fasalka</th>
+                            <th class="p-5 text-xs font-black uppercase text-right">Lacagta (Fees)</th>
+                            <th class="p-5 text-xs font-black uppercase text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sTable" class="divide-y"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ATTENDANCE -->
+        <section id="attendance" class="page space-y-6">
+            <div class="flex flex-wrap gap-4 bg-white p-4 rounded-2xl border">
+                <input type="date" id="attDate" onchange="renderAttendance()" class="p-3 bg-slate-50 rounded-xl outline-none border font-bold">
+                <select id="attFilterClass" onchange="renderAttendance()" class="p-3 bg-slate-50 rounded-xl outline-none border"></select>
+                <input type="text" id="attSearch" oninput="renderAttendance()" placeholder="Raadi magaca..." class="flex-1 p-3 bg-slate-50 rounded-xl outline-none border">
+            </div>
+            <div class="bg-white rounded-[2rem] border overflow-hidden shadow-sm">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 border-b">
+                        <tr><th class="p-5 text-xs font-black uppercase">Ardayga</th><th class="p-5 text-xs font-black uppercase">Xaaladda</th></tr>
+                    </thead>
+                    <tbody id="attTable" class="divide-y"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- PAYMENTS -->
+        <section id="payments" class="page space-y-6">
+            <div class="flex flex-wrap gap-4 bg-white p-4 rounded-2xl border">
+                <input type="text" id="pSearch" oninput="renderPayments()" placeholder="Raadi lacag bixinta..." class="flex-1 p-3 bg-slate-50 rounded-xl outline-none border">
+                <select id="pFilterClass" onchange="renderPayments()" class="p-3 bg-slate-50 rounded-xl outline-none border"></select>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-[2rem] border h-fit space-y-4 shadow-sm">
+                    <h3 class="font-black text-lg">Lacag Qabasho</h3>
+                    <select id="pStudent" onchange="showSmartInfo()" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></select>
+                    <div id="pInfo" class="hidden bg-slate-900 text-white p-6 rounded-[1.5rem] text-sm space-y-2 italic">
+                        <div class="flex justify-between"><span>Total Fee:</span> <span id="pTarget">0</span></div>
+                        <div class="flex justify-between text-green-400"><span>Paid So Far:</span> <span id="pAlreadyPaid">0</span></div>
+                        <div class="flex justify-between font-black text-orange-400 border-t border-slate-700 pt-2"><span>Balance:</span> <span id="pRem">0</span></div>
+                    </div>
+                    <input id="pAmount" type="number" placeholder="Lacagta (Amount)" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none">
+                    <button onclick="savePayment()" class="w-full bg-green-600 text-white py-4 rounded-2xl font-bold hover:bg-green-700">KAYDI LACAGTA</button>
+                </div>
+                <div class="lg:col-span-2 bg-white rounded-[2rem] border overflow-hidden shadow-sm table-container">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 border-b">
+                            <tr><th class="p-5 text-xs font-black uppercase">Ardayga</th><th class="p-5 text-xs font-black uppercase">Lacagta</th><th class="p-5 text-xs font-black uppercase">Taariikh</th><th class="p-5 text-xs font-black uppercase">Action</th></tr>
+                        </thead>
+                        <tbody id="pTable" class="divide-y"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- EXAMS -->
+        <section id="exams" class="page space-y-6">
+            <div class="bg-white p-6 rounded-[2rem] border flex flex-wrap gap-4 items-end shadow-sm">
+                <div class="flex-1 min-w-[200px]">
+                    <label class="text-[10px] font-bold uppercase text-slate-400 ml-2">Dooro Fasalka</label>
+                    <select id="exFilterClass" onchange="renderExams()" class="w-full p-3 bg-slate-50 border rounded-xl outline-none font-bold"></select>
+                </div>
+                <div class="flex-1 min-w-[200px]">
+                    <label class="text-[10px] font-bold uppercase text-slate-400 ml-2">Raadi Ardayga</label>
+                    <input type="text" id="exSearch" oninput="renderExams()" placeholder="Magaca raadi..." class="w-full p-3 bg-slate-50 border rounded-xl outline-none">
+                </div>
+            </div>
+
+            <div class="bg-white rounded-[2rem] border overflow-hidden shadow-sm table-container">
+                <table class="w-full text-left min-w-[800px]">
+                    <thead class="bg-slate-800 text-white border-b">
+                        <tr id="exHeaderRow"></tr>
+                    </thead>
+                    <tbody id="exTable" class="divide-y"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- SETTINGS -->
+        <section id="settings" class="page space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-[2rem] border shadow-sm space-y-4">
+                    <h3 class="font-black text-lg">📚 Maaddooyinka</h3>
+                    <div class="flex gap-2">
+                        <input id="newSubName" type="text" placeholder="Maaddo cusub (Fr, Ar, So...)" class="flex-1 p-3 bg-slate-50 border rounded-xl outline-none">
+                        <button onclick="addSubject()" class="bg-blue-900 text-white px-6 py-2 rounded-xl font-bold">Add</button>
+                    </div>
+                    <ul id="subList" class="space-y-2"></ul>
+                </div>
+                <div class="bg-white p-6 rounded-[2rem] border shadow-sm space-y-4">
+                    <h3 class="font-black text-lg">👥 Isticmaaleyaasha (Users)</h3>
+                    <div class="space-y-3">
+                        <input id="newUser" type="text" placeholder="Username" class="w-full p-3 bg-slate-50 border rounded-xl outline-none">
+                        <input id="newPass" type="password" placeholder="Password" class="w-full p-3 bg-slate-50 border rounded-xl outline-none">
+                        <button onclick="addUser()" class="w-full bg-blue-900 text-white py-3 rounded-xl font-bold">ABUUR USER</button>
+                    </div>
+                    <ul id="userList" class="space-y-2"></ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- STUDENT MODAL -->
+    <div id="sModal" class="fixed inset-0 bg-slate-900/60 hidden flex items-center justify-center z-[5000] p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl">
+            <h2 class="text-2xl font-black mb-6">Arday Cusub</h2>
+            <div class="space-y-4">
+                <input id="sName" type="text" placeholder="Magaca oo buuxa" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none">
+                <input id="sClass" type="text" placeholder="Fasalka (G1, G2...)" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none">
+                <input id="sFee" type="number" placeholder="Lacagta (Fees)" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none">
+                <button onclick="saveStudent()" class="w-full bg-blue-900 text-white py-4 rounded-2xl font-bold shadow-lg">KAYDI</button>
+                <button onclick="closeModal()" class="w-full text-slate-400 py-2">Xir</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getFirestore, collection, doc, addDoc, onSnapshot, updateDoc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'alrahma_v3_final';
+
+        let students = [], payments = [], exams = [], attendance = [], subjects = [], systemUsers = [];
+        let userAuth = null;
+
+        async function initAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else { await signInAnonymously(auth); }
+            } catch(e) { console.error("Auth error", e); }
+        }
+
+        onAuthStateChanged(auth, user => {
+            userAuth = user;
+            if (user) {
+                document.getElementById('authStatus').innerText = "✅ Online";
+                startSync();
+            }
+        });
+        initAuth();
+
+        function startSync() {
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'students'), s => { students = s.docs.map(d => ({id: d.id, ...d.data()})); renderAll(); });
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'payments'), s => { payments = s.docs.map(d => ({id: d.id, ...d.data()})); renderPayments(); updateDashboard(); });
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'exams'), s => { exams = s.docs.map(d => ({id: d.id, ...d.data()})); renderExams(); });
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'attendance'), s => { attendance = s.docs.map(d => ({id: d.id, ...d.data()})); renderAttendance(); });
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'subjects'), s => { subjects = s.docs.map(d => ({id: d.id, ...d.data()})); renderSettings(); renderExams(); });
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'system_users'), s => { systemUsers = s.docs.map(d => ({id: d.id, ...d.data()})); renderSettings(); });
+        }
+
+        function renderAll() {
+            renderStudents();
+            renderPayments();
+            updateDashboard();
+            updateSelectors();
+            renderAttendance();
+            renderExams();
+        }
+
+        window.showPage = (id) => {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            const btn = document.getElementById('btn' + id.charAt(0).toUpperCase() + id.slice(1));
+            if(btn) btn.classList.add('active');
+        };
+
+        // LOGIN SYSTEM
+        document.getElementById('loginBtn').onclick = () => {
+            const u = document.getElementById('loginUser').value;
+            const p = document.getElementById('loginPass').value;
+            const extraUser = systemUsers.find(x => x.user === u && x.pass === p);
+            
+            if ((u === 'admin' && p === '123') || extraUser) {
+                document.getElementById('loginOverlay').classList.add('hidden');
+            } else {
+                alert("Username ama Password-ka waa khalad!");
+            }
+        };
+
+        // STUDENT LOGIC
+        window.saveStudent = async () => {
+            const name = document.getElementById('sName').value;
+            const className = document.getElementById('sClass').value;
+            const fee = Number(document.getElementById('sFee').value);
+            if(!name || !className) return;
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'students'), { name, className, fee });
+            closeModal();
+            document.getElementById('sName').value = ""; document.getElementById('sClass').value = ""; document.getElementById('sFee').value = "";
+        };
+
+        window.renderStudents = () => {
+            const q = document.getElementById('sSearch').value.toLowerCase();
+            const fClass = document.getElementById('sFilterClass').value;
+            const filtered = students.filter(s => s.name.toLowerCase().includes(q) && (fClass === "" || s.className === fClass));
+            
+            document.getElementById('sTable').innerHTML = filtered.map(s => `
+                <tr>
+                    <td class="p-5 font-bold">${s.name}</td>
+                    <td class="p-5">${s.className}</td>
+                    <td class="p-5 text-right font-black text-blue-900">${s.fee} FDJ</td>
+                    <td class="p-5 text-center">
+                        <button onclick="deleteData('students', '${s.id}')" class="text-red-400 hover:text-red-600">🗑</button>
+                    </td>
+                </tr>
+            `).join('');
+        };
+
+        // EXAM LOGIC
+        window.renderExams = () => {
+            const fClass = document.getElementById('exFilterClass').value;
+            const q = document.getElementById('exSearch').value.toLowerCase();
+            
+            const header = document.getElementById('exHeaderRow');
+            header.innerHTML = `<th class="p-5 text-xs font-black uppercase">Ardayga</th>` + 
+                subjects.map(s => `<th class="p-5 text-xs font-black uppercase text-center">${s.name}</th>`).join('') +
+                `<th class="p-5 text-xs font-black uppercase text-center">Avg</th>`;
+
+            if(!fClass) {
+                document.getElementById('exTable').innerHTML = `<tr><td colspan="${subjects.length + 2}" class="p-10 text-center text-slate-400 italic">Dooro fasal...</td></tr>`;
+                return;
+            }
+
+            const filtered = students.filter(s => s.className === fClass && s.name.toLowerCase().includes(q));
+            document.getElementById('exTable').innerHTML = filtered.map(s => {
+                let total = 0;
+                let cells = subjects.map(sub => {
+                    const rec = exams.find(e => e.studentId === s.id && e.subject === sub.name);
+                    const score = rec ? rec.score : 0;
+                    total += score;
+                    return `<td class="p-3 text-center">
+                        <input type="number" value="${score}" onblur="updateExamLive('${s.id}','${sub.name}',this.value)" 
+                        class="w-16 p-2 bg-slate-50 border rounded-lg text-center font-bold">
+                    </td>`;
+                }).join('');
+                const avg = subjects.length > 0 ? (total / subjects.length).toFixed(1) : 0;
+                return `<tr><td class="p-5 font-bold">${s.name}</td>${cells}<td class="p-5 text-center font-black ${avg >= 50 ? 'text-green-600':'text-red-600'}">${avg}%</td></tr>`;
+            }).join('');
+        };
+
+        window.updateExamLive = async (sid, sub, val) => {
+            const score = Number(val);
+            const ex = exams.find(e => e.studentId === sid && e.subject === sub);
+            if(ex) await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'exams', ex.id), { score });
+            else await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'exams'), { studentId: sid, subject: sub, score });
+        };
+
+        // PAYMENT LOGIC
+        window.savePayment = async () => {
+            const sid = document.getElementById('pStudent').value;
+            const amt = Number(document.getElementById('pAmount').value);
+            if(!sid || !amt) return;
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'payments'), { studentId: sid, amount: amt, date: new Date().toISOString() });
+            document.getElementById('pAmount').value = "";
+            showSmartInfo();
+        };
+
+        window.renderPayments = () => {
+            const q = document.getElementById('pSearch').value.toLowerCase();
+            const fClass = document.getElementById('pFilterClass').value;
+            const filtered = payments.filter(p => {
+                const s = students.find(x => x.id === p.studentId) || {name: '', className: ''};
+                return s.name.toLowerCase().includes(q) && (fClass === "" || s.className === fClass);
+            });
+            document.getElementById('pTable').innerHTML = filtered.map(p => {
+                const s = students.find(x => x.id === p.studentId) || {name: 'Unknown'};
+                return `<tr><td class="p-5 font-bold">${s.name}</td><td class="p-5 text-green-600 font-bold">${p.amount} FDJ</td><td class="p-5 text-slate-400 text-xs">${new Date(p.date).toLocaleDateString()}</td><td class="p-5"><button onclick="deleteData('payments','${p.id}')">🗑</button></td></tr>`;
+            }).join('');
+        };
+
+        // ATTENDANCE LOGIC
+        window.renderAttendance = () => {
+            const date = document.getElementById('attDate').value || new Date().toISOString().split('T')[0];
+            const q = document.getElementById('attSearch').value.toLowerCase();
+            const fClass = document.getElementById('attFilterClass').value;
+            const filtered = students.filter(s => s.name.toLowerCase().includes(q) && (fClass === "" || s.className === fClass));
+            
+            document.getElementById('attTable').innerHTML = filtered.map(s => {
+                const rec = attendance.find(a => a.studentId === s.id && a.date === date);
+                const status = rec ? rec.status : 'present';
+                return `<tr><td class="p-5 font-bold">${s.name} (${s.className})</td><td class="p-5">
+                    <select onchange="updateAtt('${s.id}','${date}',this.value)" class="p-2 border rounded-lg ${status==='absent'?'text-red-500':'text-green-500'} font-bold">
+                        <option value="present" ${status==='present'?'selected':''}>Xaadir (P)</option>
+                        <option value="absent" ${status==='absent'?'selected':''}>Maqan (A)</option>
+                    </select>
+                </td></tr>`;
+            }).join('');
+        };
+
+        window.updateAtt = async (sid, date, status) => {
+            const ex = attendance.find(a => a.studentId === sid && a.date === date);
+            if(ex) await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', ex.id), { status });
+            else await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'attendance'), { studentId: sid, date, status });
+        };
+
+        // SETTINGS LOGIC
+        window.addSubject = async () => {
+            const name = document.getElementById('newSubName').value;
+            if(name) { await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'subjects'), { name }); document.getElementById('newSubName').value = ""; }
+        };
+        window.addUser = async () => {
+            const user = document.getElementById('newUser').value;
+            const pass = document.getElementById('newPass').value;
+            if(user && pass) { await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'system_users'), { user, pass }); document.getElementById('newUser').value = ""; document.getElementById('newPass').value = ""; }
+        };
+        window.renderSettings = () => {
+            document.getElementById('subList').innerHTML = subjects.map(s => `<li class="flex justify-between p-3 bg-slate-50 border rounded-xl"><span>${s.name}</span><button onclick="deleteData('subjects','${s.id}')" class="text-red-500">×</button></li>`).join('');
+            document.getElementById('userList').innerHTML = systemUsers.map(u => `<li class="flex justify-between p-3 bg-slate-50 border rounded-xl"><span>${u.user}</span><button onclick="deleteData('system_users','${u.id}')" class="text-red-500">×</button></li>`).join('');
+        };
+
+        // HELPERS
+        window.updateSelectors = () => {
+            const classes = [...new Set(students.map(s => s.className))].sort();
+            const classOpts = '<option value="">Fasallada</option>' + classes.map(c => `<option value="${c}">${c}</option>`).join('');
+            document.getElementById('sFilterClass').innerHTML = classOpts;
+            document.getElementById('attFilterClass').innerHTML = classOpts;
+            document.getElementById('pFilterClass').innerHTML = classOpts;
+            document.getElementById('exFilterClass').innerHTML = '<option value="">-- Dooro Fasal --</option>' + classes.map(c => `<option value="${c}">${c}</option>`).join('');
+            document.getElementById('pStudent').innerHTML = '<option value="">-- Dooro Ardayga --</option>' + students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+        };
+
+        window.updateDashboard = () => {
+            const totalPaid = payments.reduce((a, b) => a + (b.amount || 0), 0);
+            const totalFee = students.reduce((a, b) => a + (b.fee || 0), 0);
+            document.getElementById('dashStudents').innerText = students.length;
+            document.getElementById('dashPaid').innerText = totalPaid + " FDJ";
+            document.getElementById('dashBalance').innerText = (totalFee - totalPaid) + " FDJ";
+        };
+
+        window.showSmartInfo = () => {
+            const sid = document.getElementById('pStudent').value;
+            if(!sid) { document.getElementById('pInfo').classList.add('hidden'); return; }
+            const s = students.find(x => x.id === sid);
+            const paid = payments.filter(p => p.studentId === sid).reduce((a, b) => a + b.amount, 0);
+            document.getElementById('pTarget').innerText = (s.fee || 0) + " FDJ";
+            document.getElementById('pAlreadyPaid').innerText = paid + " FDJ";
+            document.getElementById('pRem').innerText = ((s.fee || 0) - paid) + " FDJ";
+            document.getElementById('pInfo').classList.remove('hidden');
+        };
+
+        window.deleteData = async (coll, id) => { if(confirm("Ma hubtaa?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', coll, id)); };
+        window.openModal = (id) => document.getElementById(id).classList.remove('hidden');
+        window.closeModal = () => document.getElementById('sModal').classList.add('hidden');
+
+    </script>
+</body>
+</html>
